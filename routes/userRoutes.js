@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 
 // Create a new router
 const router = express.Router();
@@ -108,14 +109,14 @@ router.post("/forgot-password", async (req, res) => {
 
 // Reset password endpoint
 router.post("/reset-password", async (req, res) => {
-  const { token, newPassword } = req.body;
+  const { username, newPassword } = req.body;
 
   // Find the user with the provided token
-  const user = await User.findOne({ resetPasswordToken: token });
+  const user = await User.findOne({ username });
 
   // If no user is found, or the token has expired, return an error
   if (!user || Date.now() > user.resetPasswordTokenExpires) {
-    return res.status(400).send({ message: "Invalid or expired token" });
+    return res.status(400).send({ message: "Username not found" });
   }
 
   // Hash the new password
@@ -123,8 +124,6 @@ router.post("/reset-password", async (req, res) => {
 
   // Update the user's password and clear the reset token and expiration
   user.password = hashedPassword;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordTokenExpires = undefined;
 
   // Save the updated user to the database
   await user.save();
