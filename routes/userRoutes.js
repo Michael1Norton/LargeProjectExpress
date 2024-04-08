@@ -8,7 +8,6 @@ const jwt = require("jsonwebtoken");
 
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
 
 // Create a new router
 const router = express.Router();
@@ -119,11 +118,8 @@ router.post("/reset-password", async (req, res) => {
     return res.status(400).send({ message: "Username not found" });
   }
 
-  // Hash the new password
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
   // Update the user's password and clear the reset token and expiration
-  user.password = hashedPassword;
+  user.password = newPassword;
 
   // Save the updated user to the database
   await user.save();
